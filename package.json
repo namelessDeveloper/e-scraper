@@ -5,7 +5,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": ""
+    "start": "node . https://milovana.com/webteases/showtease.php\\?id\\=48424"
   },
   "keywords": [],
   "author": "",

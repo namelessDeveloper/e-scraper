@@ -12,7 +12,6 @@
   "license": "ISC",
   "dependencies": {
     "clipboardy": "^2.3.0",
-    "prompt-sync": "^4.2.0",
     "puppeteer": "^9.1.0"
   }
 }

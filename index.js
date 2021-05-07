@@ -1,32 +1,46 @@
 import puppeteer from 'puppeteer'
+import clipboardy from 'clipboardy'
 import fs from 'fs'
-// import promptSync from'prompt-sync'
-// const prompt = promptSync()
+
 import {readAsync} from './lib/util.js'
 
-import clipboardy from 'clipboardy'
-
-
-async function main(url) {
+async function main(url, silent) {
   const browser = await puppeteer.launch()
   try {
-    await app(browser, url)
+    await app(browser, url, silent)
   } catch (error) {
     console.error(error);
   } finally {
     await browser.close()
   }
 }
-// prompt("Insert Milovana URL to scrape:\n")
-const url = process.argv.slice(2)[0]
-if(url){
-  // console.error('Scraping...')
-  main(url)
-}
 
 const MILOVANA_CACHE = '/tmp/milovana'
 
-async function app(browser, url) {
+const urls = process.argv.slice(2)
+
+if (urls.length === 0) {
+  const clipboard = clipboardy.readSync()
+  if(clipboard.startsWith('https://milovana.com/webteases/showtease.php')){
+    main(clipboard)
+  } else {
+    process.exit(0)
+  }
+}
+
+if (urls.length === 1) {
+  main(urls[0])
+}
+
+for (const url of urls) {
+  // TODO main is not awaited -> unexpected behaviour will ensue
+  main(url, true)
+}
+
+
+//TODO implement a logger to avoid passing around silent
+
+async function app(browser, url, silent = false) {
   const page = await browser.newPage()
   await page.setViewport({ width: 1000, height: 1000 })
   await page.goto(url, {
@@ -37,39 +51,46 @@ async function app(browser, url) {
     fs.mkdirSync(MILOVANA_CACHE);
   }
   const title = await getTitle(page)
-  const novel = await getNovel(page, `${MILOVANA_CACHE}/${title}.md`)
+  const novel = await getNovel(page, `${MILOVANA_CACHE}/${title}.md`, silent)
 
-  await debugScreenshot(page, title)
-
-  clipboardy.writeSync(novel);
+  !silent && clipboardy.writeSync(novel);
+  try {
+    await debugScreenshot(page, title)
+  } catch (error) {
+    console.error(error)
+  }
 }
 
 function format(text, src) {
   // reduce whitespace
   const txt = text.replace(/\n\n\n/g, '\n');
   // markdown image format
-  const img = `![](${src})`
+  const img = `![](${src})\n`
   return `${txt}\n${img}\n\n`
 }
 
 
-async function getNovel(page, path) {
-  const cache = await queryCache(path)
+async function getNovel(page, path, silent) {
+  const cache = await queryCache(path, silent)
   // Cache hit
   if(cache !== null){ 
     return cache
   }
   // scrape and cache!
-  const novel = await getMilovanaNovel(page)
-  fs.writeFileSync(path, novel);
+  const novel = await getMilovanaNovel(page, silent)
+  try {
+    fs.writeFileSync(path, novel);
+  } catch (error) {
+    console.error(error)
+  }
   return novel
 }
 
-async function queryCache(path) {
+async function queryCache(path, silent) {
   const exists = fs.existsSync(path)
   if (exists){
     const file = await readAsync(path)
-    console.log(file)
+    !silent && console.log(file)
     return file
   }
   return null
@@ -82,14 +103,14 @@ async function getTitle(page) {
 }
 
 async function debugScreenshot(page, title) {
-  const path = `${MILOVANA_CACHE}/debug-${title}.png`
+  const path = `${MILOVANA_CACHE}/${title}.png`
   if (fs.existsSync(path)){
     fs.unlinkSync(path)
   }
   await page.screenshot({ path })
 }
 
-async function getMilovanaNovel(page) {
+async function getMilovanaNovel(page, silent) {
   let continueButton
   let novel = ''
   do {
@@ -97,13 +118,15 @@ async function getMilovanaNovel(page) {
 
     const textNode = await page.$('#tease_content .text')
     let text = await textNode.evaluate(el => el.textContent)
-    console.log(text)
 
     const imgNode = await page.$('#cm_wide img')
     let src = await imgNode.evaluate(el => el.src)
-    console.log(src);
 
-    novel += format(text, src)
+    const nextPart = format(text, src)
+    
+    !silent && console.log(nextPart)
+    
+    novel += nextPart
     if(continueButton !== null) {
       await continueButton.evaluate(el => el.click())
       await page.waitForNavigation()

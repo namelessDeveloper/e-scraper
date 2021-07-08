@@ -50,19 +50,13 @@ async function app(browser, url, silent = false) {
   }
   const page = await browser.newPage()
   await page.setViewport({ width: 1000, height: 1000 })
-  await page.goto(url, {
-    waitUntil: 'networkidle2',
-  })
-  
   const cache = new Cache(E_SCRAPER_CACHE, silent)
 
   const Scraper = getScraper(url)
   const scraper = new Scraper(cache)
-  const novel = await scraper.scrape(page)
+  await scraper.scrape(page, url)
 
-  !cache.silent && clipboardy.writeSync(novel);
-
-  await debugScreenshot(page, cache.screenshotPath(scraper.title))
+  // await debugScreenshot(page, cache.screenshotPath(scraper.title))
 }
 
 async function debugScreenshot(page, path) {

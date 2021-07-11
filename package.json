@@ -1,11 +1,11 @@
 {
-  "name": "milovana-pupeteer",
+  "name": "e-scraper",
   "version": "1.0.0",
   "type": "module",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node . https://milovana.com/webteases/showtease.php\\?id\\=48424",
+    "start": "node . ",
     "test": "tap"
   },
   "keywords": [],

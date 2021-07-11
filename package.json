@@ -2,21 +2,21 @@
   "name": "e-scraper",
   "version": "1.0.0",
   "type": "module",
-  "description": "",
+  "description": "Multi site web scraping tool.",
   "main": "index.js",
   "scripts": {
     "start": "node . ",
     "test": "tap"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "nameless",
+  "license": "MIT",
   "dependencies": {
-    "@types/tap": "^15.0.5",
     "clipboardy": "^2.3.0",
     "puppeteer": "^9.1.0"
   },
   "devDependencies": {
+    "@types/tap": "^15.0.5",
     "tap": "^15.0.9"
   }
 }

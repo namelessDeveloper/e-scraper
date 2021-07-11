@@ -5,13 +5,18 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node . https://milovana.com/webteases/showtease.php\\?id\\=48424"
+    "start": "node . https://milovana.com/webteases/showtease.php\\?id\\=48424",
+    "test": "tap"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@types/tap": "^15.0.5",
     "clipboardy": "^2.3.0",
     "puppeteer": "^9.1.0"
+  },
+  "devDependencies": {
+    "tap": "^15.0.9"
   }
 }

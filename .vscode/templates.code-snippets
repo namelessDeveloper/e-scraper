@@ -1,0 +1,16 @@
+{
+	"Scrapere template": {
+		"prefix": "scrape",
+		"body": [
+			"import { Scraper } from './scraper.js'",
+			"",
+			"export class ${TM_FILENAME_BASE/(.*)/${1:/pascalcase}/g} extends Scraper {",
+			"",
+			"  async scrape(url) {",
+			"    // implementation goes here",
+			"  }",
+			"}"
+		],
+		"description": "Scrapere template"
+	}
+}

@@ -53,8 +53,8 @@ async function app(browser, url, silent = false) {
   const cache = new Cache(E_SCRAPER_CACHE, silent)
 
   const Scraper = getScraper(url)
-  const scraper = new Scraper(cache)
-  await scraper.scrape(page, url)
+  const scraper = new Scraper({page, cache})
+  await scraper.scrape(url)
 
   // await debugScreenshot(page, cache.screenshotPath(scraper.title))
 }

@@ -11,44 +11,41 @@ const urls = process.argv.slice(2)
 main(urls)
 
 async function main(urls) {
-  const browser = await puppeteer.launch()
-  try {
-    if (urls.length === 0) {
-      const clipboard = clipboardy.readSync()
-      if(clipboard.startsWith('https://')){
-        await app(browser, clipboard)
-      } else {
-        process.exit(0)
-      }
-    }
-    
-    if (urls.length === 1) {
-      await app(browser, urls[0])
+  if (urls.length === 0) {
+    const clipboard = clipboardy.readSync()
+    if(clipboard.startsWith('https://')){
+      await app(clipboard)
     } else {
-      for (const url of urls) {
-        await app(browser, url, true)
-      }
+      process.exit(0)
     }
+  }
+  
+  if (urls.length === 1) {
+    await app(urls[0])
+  } else {
+    for (const url of urls) {
+      await app(url, true)
+    }
+  }
+}
 
+async function app(url, silent = false) {
+  if(!isWebUri(url)) {
+    console.error('Not a valid URL')
+    return
+  }
+  const browser = await puppeteer.launch()
+  const page = await browser.pages()[0]
+  await page.setViewport({ width: 1000, height: 1000 })
+  
+  try {
+    const cache = new Cache(E_SCRAPER_CACHE, silent)
+    const Scraper = getScraper(url)
+    const scraper = new Scraper({page, cache})
+    await scraper.scrape(url)
   } catch (error) {
     console.error(error);
   } finally {
     await browser.close()
   }
-}
-
-async function app(browser, url, silent = false) {
-  if(!isWebUri(url)) {
-    console.error('Not a valid URL')
-    return
-  }
-  const page = await browser.newPage()
-  await page.setViewport({ width: 1000, height: 1000 })
-  const cache = new Cache(E_SCRAPER_CACHE, silent)
-
-  const Scraper = getScraper(url)
-  const scraper = new Scraper({page, cache})
-  await scraper.scrape(url)
-
-  await page.close()
 }

@@ -30,7 +30,6 @@ async function main(urls) {
       }
     }
 
-    await app(browser, url)
   } catch (error) {
     console.error(error);
   } finally {

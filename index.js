@@ -1,47 +1,42 @@
 import puppeteer from 'puppeteer'
 import clipboardy from 'clipboardy'
 import { isWebUri } from 'valid-url'
-import fs from 'fs'
 import { Cache } from './lib/cache.js'
 import { getScraper } from './lib/scrapers/index.js'
 
+const E_SCRAPER_CACHE = '/tmp/e-scraper'
 
-async function main(url, silent) {
+const urls = process.argv.slice(2)
+
+main(urls)
+
+async function main(urls) {
   const browser = await puppeteer.launch()
   try {
-    await app(browser, url, silent)
+    if (urls.length === 0) {
+      const clipboard = clipboardy.readSync()
+      if(clipboard.startsWith('https://')){
+        await app(browser, clipboard)
+      } else {
+        process.exit(0)
+      }
+    }
+    
+    if (urls.length === 1) {
+      await app(browser, urls[0])
+    } else {
+      for (const url of urls) {
+        await app(browser, url, true)
+      }
+    }
+
+    await app(browser, url)
   } catch (error) {
     console.error(error);
   } finally {
     await browser.close()
   }
 }
-
-const E_SCRAPER_CACHE = '/tmp/e-scraper'
-
-const urls = process.argv.slice(2)
-
-if (urls.length === 0) {
-  const clipboard = clipboardy.readSync()
-  if(clipboard.startsWith('https://')){
-    main(clipboard)
-  } else {
-    process.exit(0)
-  }
-}
-
-if (urls.length === 1) {
-  main(urls[0])
-} else {
-  for (const url of urls) {
-    // TODO main is not awaited -> unexpected behaviour will ensue
-    main(url, true)
-  }
-}
-
-
-
-//TODO implement a logger to avoid passing around silent
 
 async function app(browser, url, silent = false) {
   if(!isWebUri(url)) {
@@ -56,16 +51,5 @@ async function app(browser, url, silent = false) {
   const scraper = new Scraper({page, cache})
   await scraper.scrape(url)
 
-  // await debugScreenshot(page, cache.screenshotPath(scraper.title))
-}
-
-async function debugScreenshot(page, path) {
-  try {
-    if (fs.existsSync(path)){
-      fs.unlinkSync(path)
-    }
-    await page.screenshot({ path })
-  } catch (error) {
-    console.error(error)
-  }
+  await page.close()
 }

@@ -2,13 +2,14 @@ import clipboardy from 'clipboardy'
 import { isWebUri } from 'valid-url'
 import { Command } from 'commander';
 
-import { app, appOptions } from './app';
+import { app, appOptions } from './app.js';
 
 const cmd = new Command();
 
 cmd
   .option('-i, --interactive', 'Enables Interractive Mode (e.g. Eos for milovana)')
   .option('-c, --clipboard', 'Uses a link in the clipboard')
+  .option('-l, --login', 'Prompt login for given scraper. Some types of scraping e.g. Milovana Eos require a logged in user.')
 
 cmd.parse(process.argv)
 
@@ -22,6 +23,7 @@ main(urls, opts)
 const defaultCommandOptions = {
   interactive: false,
   clipboard: false,
+  login: false,
 }
 
 async function main(urls, opt = defaultCommandOptions) {

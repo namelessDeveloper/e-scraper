@@ -9,6 +9,10 @@
 			"  async scrape(url) {",
 			"    // implementation goes here",
 			"  }",
+			"",
+			"  async login() {",
+			"    // implementation goes here",
+			"  }",
 			"}"
 		],
 		"description": "Scrapere template"

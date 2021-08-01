@@ -21,7 +21,14 @@ export async function app(url, options = appOptions()) {
     console.error('Not a valid URL')
     return
   }
-  const browser = await puppeteer.launch({headless: !options.interactive})
+  const browser = await puppeteer.launch({
+    headless: !options.interactive,
+    // These args are required for selecting inside iframes
+    args:[
+      '--disable-web-security',
+      '--disable-features=IsolateOrigins,site-per-process'
+    ]
+  })
   const page = await browser.newPage()
   await page.setViewport({ width: 1000, height: 1000 })
   
